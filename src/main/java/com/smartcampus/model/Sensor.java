@@ -8,15 +8,21 @@ public class Sensor {
 
     private String id;
     private String type;
+    private String status;
+    private double currentValue;
     private String roomId;
 
-  
-    private String status;          
-    private double currentValue;    
-    
     public Sensor() {}
 
- 
+    public Sensor(String id, String type, String status, String roomId) {
+        this.id = id;
+        this.type = type;
+        this.status = status;
+        this.roomId = roomId;
+    }
+
+  
+
     public String getId() {
         return id;
     }
@@ -33,15 +39,6 @@ public class Sensor {
         this.type = type;
     }
 
-    public String getRoomId() {
-        return roomId;
-    }
-
-    public void setRoomId(String roomId) {
-        this.roomId = roomId;
-    }
-
-   
     public String getStatus() {
         return status;
     }
@@ -50,12 +47,19 @@ public class Sensor {
         this.status = status;
     }
 
-    
     public double getCurrentValue() {
         return currentValue;
     }
 
     public void setCurrentValue(double currentValue) {
         this.currentValue = currentValue;
+    }
+
+    public String getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
     }
 }

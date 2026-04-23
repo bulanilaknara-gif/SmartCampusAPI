@@ -5,7 +5,7 @@
 package com.smartcampus.resource;
 
 public class SensorUnavailableException extends RuntimeException {
-    public SensorUnavailableException(String message) {
-        super(message);
+    public SensorUnavailableException(String msg) {
+        super(msg);
     }
 }

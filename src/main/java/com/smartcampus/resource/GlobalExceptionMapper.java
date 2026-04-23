@@ -4,22 +4,16 @@
  */
 package com.smartcampus.resource;
 
-
 import javax.ws.rs.core.*;
 import javax.ws.rs.ext.*;
-import java.util.*;
 
 @Provider
 public class GlobalExceptionMapper implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(Throwable ex) {
-
-        Map<String, String> error = new HashMap<>();
-        error.put("error", "Internal server error");
-
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(error)
+                .entity("{\"error\":\"Internal server error\"}")
                 .type(MediaType.APPLICATION_JSON)
                 .build();
     }

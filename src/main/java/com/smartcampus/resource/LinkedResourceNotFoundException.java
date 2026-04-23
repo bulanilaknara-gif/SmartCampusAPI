@@ -5,7 +5,7 @@
 package com.smartcampus.resource;
 
 public class LinkedResourceNotFoundException extends RuntimeException {
-    public LinkedResourceNotFoundException(String message) {
-        super(message);
+    public LinkedResourceNotFoundException(String msg) {
+        super(msg);
     }
 }

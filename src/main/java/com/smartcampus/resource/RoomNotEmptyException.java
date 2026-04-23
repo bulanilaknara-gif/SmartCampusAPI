@@ -4,8 +4,10 @@
  */
 package com.smartcampus.resource;
 
+
+
 public class RoomNotEmptyException extends RuntimeException {
-    public RoomNotEmptyException(String message) {
-        super(message);
+    public RoomNotEmptyException(String msg) {
+        super(msg);
     }
 }

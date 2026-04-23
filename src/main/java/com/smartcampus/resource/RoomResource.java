@@ -6,36 +6,49 @@ package com.smartcampus.resource;
 
 import com.smartcampus.model.Room;
 import com.smartcampus.storage.DataStore;
-import com.smartcampus.exception.RoomNotEmptyException;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.*;
 import java.util.Collection;
-import javax.ws.rs.core.Response;
 
 @Path("/v1/rooms")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class RoomResource {
 
-   
+    
     @GET
-    public Collection<Room> getAllRooms() {
+    public Collection<Room> getRooms() {
         return DataStore.rooms.values();
     }
 
-  
+    
     @POST
-    public Room createRoom(Room room) {
+    public Response createRoom(Room room) {
+
+        if (room == null || room.getId() == null || room.getId().trim().isEmpty()) {
+            throw new BadRequestException("Room id is required");
+        }
+
         DataStore.rooms.put(room.getId(), room);
-        return room;
+
+        return Response.status(Response.Status.CREATED)
+                .entity(room)
+                .build();
     }
 
-   
+    
     @GET
     @Path("/{id}")
-    public Room getRoomById(@PathParam("id") String id) {
-        return DataStore.rooms.get(id);
+    public Room getRoom(@PathParam("id") String id) {
+
+        Room room = DataStore.rooms.get(id);
+
+        if (room == null) {
+            throw new NotFoundException("Room not found");
+        }
+
+        return room;
     }
 
     
@@ -43,18 +56,19 @@ public class RoomResource {
     @Path("/{id}")
     public Response deleteRoom(@PathParam("id") String id) {
 
-        if (!DataStore.rooms.containsKey(id)) {
+        Room room = DataStore.rooms.get(id);
+
+        if (room == null) {
             throw new NotFoundException("Room not found");
         }
 
-        if (!DataStore.rooms.get(id).getSensorIds().isEmpty()) {
-            throw new RoomNotEmptyException("Room has active sensors and cannot be deleted");
+        
+        if (room.getSensorIds() != null && !room.getSensorIds().isEmpty()) {
+            throw new RoomNotEmptyException("Room is not empty");
         }
 
         DataStore.rooms.remove(id);
 
-        return Response.ok("Room deleted successfully").build();
-}
-
-   
+        return Response.ok("{\"message\":\"Room deleted\"}").build();
+    }
 }

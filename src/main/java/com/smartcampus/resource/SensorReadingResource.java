@@ -6,6 +6,7 @@ package com.smartcampus.resource;
 
 import com.smartcampus.model.Sensor;
 import com.smartcampus.model.SensorReading;
+import com.smartcampus.storage.DataStore;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
@@ -14,43 +15,61 @@ import java.util.*;
 public class SensorReadingResource {
 
     private String sensorId;
-    private Map<String, Sensor> sensors;
-    private Map<String, List<SensorReading>> readingsMap;
 
-    public SensorReadingResource(String sensorId,
-                                 Map<String, Sensor> sensors,
-                                 Map<String, List<SensorReading>> readingsMap) {
+    public SensorReadingResource(String sensorId) {
         this.sensorId = sensorId;
-        this.sensors = sensors;
-        this.readingsMap = readingsMap;
     }
 
+    
     @GET
-    public Response getReadings() {
-        return Response.ok(
-                readingsMap.getOrDefault(sensorId, new ArrayList<>())
-        ).build();
-    }
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<SensorReading> getReadings() {
 
-    @POST
-    public Response addReading(SensorReading reading) {
+        Sensor sensor = DataStore.sensors.get(sensorId);
 
-        Sensor sensor = sensors.get(sensorId);
-
-        
-        if ("MAINTENANCE".equalsIgnoreCase(sensor.getStatus())) {
-            throw new SensorUnavailableException("Sensor is under maintenance");
+        if (sensor == null) {
+            throw new NotFoundException("Sensor not found");
         }
 
-        reading.setId(UUID.randomUUID().toString());
-        reading.setTimestamp(System.currentTimeMillis());
+        return DataStore.readings.getOrDefault(sensorId, new ArrayList<>());
+    }
 
-        readingsMap.computeIfAbsent(sensorId, k -> new ArrayList<>())
-                   .add(reading);
+   
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response addReading(SensorReading reading) {
 
-     
+        
+        if (reading == null) {
+            throw new BadRequestException("Reading cannot be null");
+        }
+
+        Sensor sensor = DataStore.sensors.get(sensorId);
+
+        if (sensor == null) {
+            throw new NotFoundException("Sensor not found");
+        }
+
+        
+        if (sensor.getStatus() == null ||
+            "MAINTENANCE".equalsIgnoreCase(sensor.getStatus()) ||
+            "OFFLINE".equalsIgnoreCase(sensor.getStatus())) {
+
+            throw new SensorUnavailableException("Sensor unavailable");
+        }
+
+        
+        DataStore.readings
+                .computeIfAbsent(sensorId, k -> new ArrayList<>())
+                .add(reading);
+
+        
         sensor.setCurrentValue(reading.getValue());
 
-        return Response.status(Response.Status.CREATED).entity(reading).build();
+        
+        return Response.status(Response.Status.CREATED)
+                .entity("{\"message\":\"Reading added\"}")
+                .build();
     }
 }

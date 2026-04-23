@@ -1,7 +1,6 @@
 target/
-*.log
 *.class
+*.log
 *.jar
 *.war
-.idea/
 nbproject/private/
